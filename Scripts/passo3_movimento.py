@@ -4,7 +4,8 @@ from pathlib import Path
 
 N_ZONAS = 3
 PERSISTENCIA = 0.7   # segundos que a zona fica ativa depois do último movimento
-FPS_ANIM = 24        # velocidade da animação (frames por segundo)
+FPS_ANIM = [12, 24, 24]        # velocidade da animação (frames por segundo)
+TAMANHO_REL = [0.85, 1.1, 1.1]        # tamanho relativo de cada animação
 
 # Pasta do projeto = uma pasta acima de Scripts/ (funciona de qualquer sítio)
 RAIZ = Path(__file__).resolve().parent.parent
@@ -28,9 +29,15 @@ def carregar(pasta, tamanho):
 
 
 def sobrepor(fundo, png, x, y):
-    """Cola um PNG com transparência sobre o frame, com o canto superior esquerdo em (x, y)."""
+    """Cola um PNG com alfa sobre o frame; corta o que sair da imagem."""
+    H, W = fundo.shape[:2]
     h, w = png.shape[:2]
-    roi = fundo[y:y + h, x:x + w]
+    x0, y0 = max(x, 0), max(y, 0)
+    x1, y1 = min(x + w, W), min(y + h, H)
+    if x0 >= x1 or y0 >= y1:
+        return
+    png = png[y0 - y:y1 - y, x0 - x:x1 - x]
+    roi = fundo[y0:y1, x0:x1]
     alfa = png[:, :, 3:4] / 255.0
     roi[:] = (alfa * png[:, :, :3] + (1 - alfa) * roi).astype("uint8")
 
@@ -42,9 +49,9 @@ ok, frame = cap.read()
 if not ok:
     raise SystemExit("Não consegui ler a câmara")
 altura, largura = frame.shape[:2]
-tamanho = min(largura // N_ZONAS, altura)   # cada animação cabe dentro da sua zona
+tamanho = [int(altura * r) for r in TAMANHO_REL]
 
-animacoes = [carregar(p, tamanho) for p in PASTAS]
+animacoes = [carregar(p, t) for p, t in zip(PASTAS, tamanho)]
 
 anterior = None
 ultimo = [0.0] * N_ZONAS         # última vez que houve movimento em cada zona
@@ -88,11 +95,12 @@ while True:
 
         if ativa:
             anim = animacoes[z]
-            i = int((agora - inicio[z]) * FPS_ANIM) % len(anim)   # ciclo
+            t = tamanho[z]
+            i = int((agora - inicio[z]) * FPS_ANIM[z]) % len(anim)
             x0 = z * largura // N_ZONAS
-            # centrar o PNG dentro da zona
-            px = x0 + (largura // N_ZONAS - tamanho) // 2
-            py = (altura - tamanho) // 2
+            x1 = (z + 1) * largura // N_ZONAS
+            px = x0 + (x1 - x0 - t) // 2                # centrar na zona
+            py = (altura - t) // 2
             sobrepor(frame, anim[i], px, py)
 
     # --- linhas divisórias e nomes das zonas ---
