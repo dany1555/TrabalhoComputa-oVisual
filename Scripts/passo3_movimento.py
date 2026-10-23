@@ -43,17 +43,22 @@ def sobrepor(fundo, png, x, y):
 
 
 cap = cv2.VideoCapture(0)
+if not cap.isOpened():
+    raise SystemExit("Não foi possível abrir a câmara")
 
 # Ler um frame só para saber o tamanho da câmara e preparar as animações
 ok, frame = cap.read()
 if not ok:
     raise SystemExit("Não consegui ler a câmara")
+frame = cv2.flip(frame, 1)
 altura, largura = frame.shape[:2]
 tamanho = [int(altura * r) for r in TAMANHO_REL]
 
 animacoes = [carregar(p, t) for p, t in zip(PASTAS, tamanho)]
 
-anterior = None
+# Preparar o primeiro frame como referência para a deteção de movimento.
+anterior = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+anterior = cv2.GaussianBlur(anterior, (21, 21), 0)
 ultimo = [0.0] * N_ZONAS         # última vez que houve movimento em cada zona
 inicio = [0.0] * N_ZONAS         # quando a animação de cada zona (re)começou
 estava_ativa = [False] * N_ZONAS
@@ -67,24 +72,23 @@ while True:
 
     # --- deteção de movimento ---
     cinza = cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (21, 21), 0)
-    if anterior is None:
-        anterior = cinza
-        continue
     diff = cv2.absdiff(anterior, cinza)
-    anterior = cinza
     _, mascara = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
     mascara = cv2.dilate(mascara, None, iterations=2)
 
     agora = time.time()
     contornos, _ = cv2.findContours(mascara, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for c in contornos:
-        if cv2.contourArea(c) < 1500:
+        if cv2.contourArea(c) < 1000:
             continue
         x, y, w, h = cv2.boundingRect(c)
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cx = x + w // 2
         zona = min(cx * N_ZONAS // largura, N_ZONAS - 1)
         ultimo[zona] = agora
+
+    # O frame atual passa a ser a referência da próxima comparação.
+    anterior = cinza.copy()
 
     # --- animações das zonas ativas ---
     for z in range(N_ZONAS):
