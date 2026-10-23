@@ -1,45 +1,112 @@
 import cv2
+import time
+from pathlib import Path
+
+N_ZONAS = 3
+PERSISTENCIA = 0.7   # segundos que a zona fica ativa depois do último movimento
+FPS_ANIM = 24        # velocidade da animação (frames por segundo)
+
+# Pasta do projeto = uma pasta acima de Scripts/ (funciona de qualquer sítio)
+RAIZ = Path(__file__).resolve().parent.parent
+ASSETS = RAIZ / "Animacoes" / "assets"
+PASTAS = ["zona1_cadeira", "zona2_copo", "zona3_vela"]
+
+
+def carregar(pasta, tamanho):
+    """Lê todos os PNGs da pasta (com alfa) e redimensiona para tamanho x tamanho."""
+    ficheiros = sorted((ASSETS / pasta).glob("*.png"))
+    if not ficheiros:
+        raise SystemExit(f"Não encontrei PNGs em: {ASSETS / pasta}")
+    frames = []
+    for f in ficheiros:
+        img = cv2.imread(str(f), cv2.IMREAD_UNCHANGED)   # UNCHANGED = mantém o alfa
+        if img is None or img.ndim < 3 or img.shape[2] != 4:
+            raise SystemExit(f"Ficheiro sem canal alfa (RGBA): {f}")
+        frames.append(cv2.resize(img, (tamanho, tamanho), interpolation=cv2.INTER_AREA))
+    print(f"{pasta}: {len(frames)} frames carregados")
+    return frames
+
+
+def sobrepor(fundo, png, x, y):
+    """Cola um PNG com transparência sobre o frame, com o canto superior esquerdo em (x, y)."""
+    h, w = png.shape[:2]
+    roi = fundo[y:y + h, x:x + w]
+    alfa = png[:, :, 3:4] / 255.0
+    roi[:] = (alfa * png[:, :, :3] + (1 - alfa) * roi).astype("uint8")
+
 
 cap = cv2.VideoCapture(0)
+
+# Ler um frame só para saber o tamanho da câmara e preparar as animações
+ok, frame = cap.read()
+if not ok:
+    raise SystemExit("Não consegui ler a câmara")
+altura, largura = frame.shape[:2]
+tamanho = min(largura // N_ZONAS, altura)   # cada animação cabe dentro da sua zona
+
+animacoes = [carregar(p, tamanho) for p in PASTAS]
+
 anterior = None
+ultimo = [0.0] * N_ZONAS         # última vez que houve movimento em cada zona
+inicio = [0.0] * N_ZONAS         # quando a animação de cada zona (re)começou
+estava_ativa = [False] * N_ZONAS
 
 while True:
     ok, frame = cap.read()
     if not ok:
         break
 
-    # 1) cinzento + desfocar (menos ruído)
-    cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    cinza = cv2.GaussianBlur(cinza, (21, 21), 0)
+    frame = cv2.flip(frame, 1)   # espelhar
 
-    # no primeiro frame ainda não há "anterior" para comparar
+    # --- deteção de movimento ---
+    cinza = cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (21, 21), 0)
     if anterior is None:
         anterior = cinza
         continue
-
-    # 2) diferença entre o frame anterior e o atual
     diff = cv2.absdiff(anterior, cinza)
     anterior = cinza
-
-    # 3) limiar: o que mudou muito fica branco, o resto preto
     _, mascara = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
-
-    # 4) dilatar: junta pedaços brancos próximos numa mancha só
     mascara = cv2.dilate(mascara, None, iterations=2)
 
-    # 5) encontrar as manchas e desenhar uma caixa em cada
+    agora = time.time()
     contornos, _ = cv2.findContours(mascara, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for c in contornos:
-        if cv2.contourArea(c) < 1500:   # ignora manchas pequenas (ruído)
+        if cv2.contourArea(c) < 1500:
             continue
         x, y, w, h = cv2.boundingRect(c)
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cx = x + w // 2
+        zona = min(cx * N_ZONAS // largura, N_ZONAS - 1)
+        ultimo[zona] = agora
 
-    cv2.imshow("Movimento", frame)
-    cv2.imshow("Mascara", mascara)   # só para perceberes o que o programa "vê"
+    # --- animações das zonas ativas ---
+    for z in range(N_ZONAS):
+        ativa = (agora - ultimo[z]) < PERSISTENCIA
+        if ativa and not estava_ativa[z]:
+            inicio[z] = agora            # animação recomeça do frame 1
+        estava_ativa[z] = ativa
+
+        if ativa:
+            anim = animacoes[z]
+            i = int((agora - inicio[z]) * FPS_ANIM) % len(anim)   # ciclo
+            x0 = z * largura // N_ZONAS
+            # centrar o PNG dentro da zona
+            px = x0 + (largura // N_ZONAS - tamanho) // 2
+            py = (altura - tamanho) // 2
+            sobrepor(frame, anim[i], px, py)
+
+    # --- linhas divisórias e nomes das zonas ---
+    for z in range(N_ZONAS):
+        x0 = z * largura // N_ZONAS
+        if z > 0:
+            cv2.line(frame, (x0, 0), (x0, altura), (255, 255, 255), 2)
+        cv2.putText(frame, f"Zona {z + 1}", (x0 + 10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+
+    cv2.imshow("Projeto", frame)
 
     tecla = cv2.waitKey(1) & 0xFF
-    fechada = cv2.getWindowProperty("Movimento", cv2.WND_PROP_VISIBLE) < 1
+    fechada = cv2.getWindowProperty("Projeto", cv2.WND_PROP_VISIBLE) < 1
     if tecla == ord("q") or fechada:
         break
 
