@@ -1,1 +1,2 @@
 cenas/texturas/HdrOutdoorFieldBaseballDayClear001/HdrOutdoorFieldBaseballDayClear001_HDR_8K.exr filter=lfs diff=lfs merge=lfs -text
+*.exr filter=lfs diff=lfs merge=lfs -text
