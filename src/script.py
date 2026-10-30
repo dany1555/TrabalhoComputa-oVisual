@@ -4,24 +4,23 @@ from pathlib import Path
 
 N_ZONAS = 3
 PERSISTENCIA = 0.7   # segundos que a zona fica ativa depois do último movimento
-FPS_ANIM = [12, 24, 24]        # velocidade da animação (frames por segundo)
-TAMANHO_REL = [0.85, 1.1, 1.1]        # tamanho relativo de cada animação
+FPS_ANIM = [12, 24, 24]        # velocidade da animação
+TAMANHO_REL = [0.85, 1.1, 1.1]        # tamanho de cada animação
 
-# Pasta do projeto = uma pasta acima de Scripts/ (funciona de qualquer sítio)
 RAIZ = Path(__file__).resolve().parent.parent
 ASSETS = RAIZ / "Animacoes" / "assets"
 PASTAS = ["zona1_cadeira", "zona2_copo", "zona3_vela"]
 
 
 def carregar(pasta, tamanho):
-    """Lê todos os PNGs da pasta (com alfa) e redimensiona para tamanho x tamanho."""
+    #Lê todos os PNGs da pasta (com alfa) e redimensiona para tamanho x tamanho.
     ficheiros = sorted((ASSETS / pasta).glob("*.png"))
     if not ficheiros:
         raise SystemExit(f"Não encontrei PNGs em: {ASSETS / pasta}")
     frames = []
     for f in ficheiros:
         img = cv2.imread(str(f), cv2.IMREAD_UNCHANGED)   # UNCHANGED = mantém o alfa
-        if img is None or img.ndim < 3 or img.shape[2] != 4:
+        if img is None or img.ndim < 3 or img.shape[2] != 4: #verifica se tem canal alfa
             raise SystemExit(f"Ficheiro sem canal alfa (RGBA): {f}")
         frames.append(cv2.resize(img, (tamanho, tamanho), interpolation=cv2.INTER_AREA))
     print(f"{pasta}: {len(frames)} frames carregados")
@@ -29,7 +28,7 @@ def carregar(pasta, tamanho):
 
 
 def sobrepor(fundo, png, x, y):
-    """Cola um PNG com alfa sobre o frame; corta o que sair da imagem."""
+    #Cola um PNG com alfa sobre o frame; corta o que sair da imagem.
     H, W = fundo.shape[:2]
     h, w = png.shape[:2]
     x0, y0 = max(x, 0), max(y, 0)
