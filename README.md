@@ -2,13 +2,13 @@
 
 **Curso:** Licenciatura em Engenharia de Sistemas de Informação / LESTI (ISE) — Universidade do Algarve  
 **Unidade Curricular:** Computação Visual (2026/27)  
-**Projeto de Grupo:** Vasco Matos a85234 Daniel   
+**Projeto de Grupo:** Vasco Matos a85234 Daniel Martins a85281  
 
 ---
 
 ## Tema do Projeto
 
-O propjeto teve como base o desenvolvimento de um programa que, atravez de uma camera anexa ao computador, seja verificado movimento numa determinada area, gerando assim uma animação. Essa animação sendo criada em Blender fazendo parte de uma cena de uma explanada.
+O projeto teve como base o desenvolvimento de um programa que, atravez de uma camera anexa ao computador, seja verificado movimento numa determinada area, gerando assim uma animação. Essa animação sendo criada em Blender fazendo parte de uma cena de uma explanada.
 
 ---
 
@@ -21,7 +21,7 @@ O propjeto teve como base o desenvolvimento de um programa que, atravez de uma c
 | **Zona 3** (Direita) | **Vela** (`zona3_vela`) | Animação da vela com chama/movimento em ciclo (24 FPS) | *Vasco* |
 
 > **Nota:**  
-> Além dos objetos animados por zona, a cena 3D global inclui a mesa redonda, lugares postos (pratos, garfos, facas), tapete e lâmpada, modelados pelos elementos do grupo e disponibilizados na pasta `Blender/` e `Data/`. Estes objetos foram modelados por ambos os membros sendo escolhido os mais adequados para a cena final.
+> Além dos objetos animados por zona, a cena 3D global inclui a mesa redonda, lugares postos (pratos, garfos, facas), tapete e lâmpada,um salgueiro e um jarro de água, modelados pelos elementos do grupo e disponibilizados na pasta `Blender/` e `Data/`. Estes objetos foram modelados por ambos os membros sendo escolhido os mais adequados para a cena final.
 
 ---
 
@@ -33,25 +33,31 @@ TrabalhoComputa-oVisual/
 │   └── assets/                  # Sequências de frames PNG em RGBA (fundo transparente)
 │       ├── zona1_cadeira/       # Frames da animação da Zona 1
 │       ├── zona2_copo/          # Frames da animação da Zona 2
-│       └── zona3_vela/          # Frames da animação da Zona 3
+│       ├── zona3_vela/          # Frames da animação da Zona 3
+│       ├── zona4_Salgueiro/     # Frames da animação adicionais
+│       └── zona5_Jarro/         # Frames da animação adicionais
 ├── Blender/                     # Ficheiros originais de modelação (.blend em Blender 5.2 LTS)
 │   ├── cadeira_cor.blend
 │   ├── Cadeira.blend
 │   ├── Copo.blend
 │   ├── Faca.blend
 │   ├── Garfo.blend
+│   ├── Jarro.blend
 │   ├── Lampada.blend
 │   ├── mesa.blend
 │   ├── prato.blend
+│   ├── Salgueiro.blend
 │   ├── Tapete.blend
 │   ├── vela.blend
 │   └── vela.blend1
 ├── Data/                        # Cenas e texturas
 │   ├── texturas/
 │   ├── cena1.blend
-│   └── cena1.blend1
+│   ├── cena1.blend1
+│   └── cena1-Tudo.blend
 ├── src/                         # Código-fonte Python
 │   ├── script.py                # Script principal
+│   ├── deteçao_movimento.py     # Deteção de movimento
 │   └── teste_camara.py          # Script auxiliar de teste de captura de câmara
 ├── .gitattributes
 └── README.md                    # Documentação do projeto
