@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import time
-import math
 from pathlib import Path
 
 N_ZONAS = 5
@@ -10,7 +9,6 @@ FPS_ANIM = [12, 24, 24, 24, 24]               # velocidade da animação (frames
 TAMANHO_REL = [1.1, 1.1, 1.1, 1.1, 1.1]      # tamanho relativo de cada animação
 FRAMES_APRENDIZAGEM = 40   # frames iniciais para o MOG2 aprender o fundo
 HISTORY_MOG2 = 500
-TEMPO_ADAPTACAO_FUNDO = 10.0  # segundos; mantém uma adaptação semelhante entre frequências
 
 # Pasta do projeto = uma pasta acima de src/ (funciona de qualquer sítio)
 RAIZ = Path(__file__).resolve().parent.parent
@@ -21,7 +19,6 @@ JANELA = "Projeto"
 SLIDER_SENSIBILIDADE = "Sensibilidade (menor = mais sensivel)"
 SLIDER_AREA = "Area minima (px)"
 SLIDER_AUTO = "Atualizar fundo (0=nao, 1=sim)"
-SLIDER_FREQUENCIA = "Frequencia do fundo (Hz)"
 
 
 def criar_subtrator(limiar):
@@ -33,7 +30,7 @@ def criar_subtrator(limiar):
 
 
 def carregar(pasta, tamanho):
-    #Lê todos os PNGs da pasta (com alfa) e redimensiona para tamanho x tamanho.
+    # Lê todos os PNGs da pasta (com alfa) e redimensiona para tamanho x tamanho.
     ficheiros = sorted((ASSETS / pasta).glob("*.png"))
     if not ficheiros:
         raise SystemExit(f"Não encontrei PNGs em: {ASSETS / pasta}")
@@ -45,7 +42,6 @@ def carregar(pasta, tamanho):
             raise SystemExit(f"Ficheiro sem canal alfa (RGBA): {f}")
         imgs.append(img)
 
-
     frames = []
     for img in imgs:
         frames.append(cv2.resize(img, (tamanho, tamanho), interpolation=cv2.INTER_AREA))
@@ -55,7 +51,7 @@ def carregar(pasta, tamanho):
 
 
 def sobrepor(fundo, png, x, y):
-    #Cola um PNG com alfa sobre o frame; corta o que sair da imagem.
+    # Cola um PNG com alfa sobre o frame; corta o que sair da imagem.
     H, W = fundo.shape[:2]
     h, w = png.shape[:2]
     x0, y0 = max(x, 0), max(y, 0)
@@ -94,10 +90,9 @@ cv2.namedWindow(JANELA, cv2.WINDOW_NORMAL)
 cv2.createTrackbar(SLIDER_SENSIBILIDADE, JANELA, 50, 200, lambda v: None)
 cv2.createTrackbar(SLIDER_AREA, JANELA, 1000, 5000, lambda v: None)
 cv2.createTrackbar(SLIDER_AUTO, JANELA, 1, 1, lambda v: None)
-cv2.createTrackbar(SLIDER_FREQUENCIA, JANELA, 2, 10, lambda v: None)
 
 # A janela fica maior; a altura extra dá espaço aos sliders.
-cv2.resizeWindow(JANELA, int(largura * 1.10), int(altura * 1.10) + 110)
+cv2.resizeWindow(JANELA, int(largura * 1.10), int(altura * 1.10) + 90)
 
 limiar_atual = 50
 subtrator = criar_subtrator(limiar_atual)
@@ -107,7 +102,6 @@ ultimo = [0.0] * N_ZONAS         # última vez que houve movimento em cada zona
 inicio = [0.0] * N_ZONAS         # quando a animação de cada zona (re)começou
 estava_ativa = [False] * N_ZONAS
 n_frames = 0
-ultima_atualizacao_fundo = None
 
 try:
     while True:
@@ -123,7 +117,6 @@ try:
         limiar = max(cv2.getTrackbarPos(SLIDER_SENSIBILIDADE, JANELA), 1)
         area_min = cv2.getTrackbarPos(SLIDER_AREA, JANELA)
         auto_fundo = cv2.getTrackbarPos(SLIDER_AUTO, JANELA) == 1
-        frequencia = max(cv2.getTrackbarPos(SLIDER_FREQUENCIA, JANELA), 1)
 
         if limiar != limiar_atual:
             subtrator.setVarThreshold(limiar)
@@ -133,27 +126,11 @@ try:
         aprendendo = n_frames <= FRAMES_APRENDIZAGEM
         if aprendendo:
             mascara = subtrator.apply(frame)
-            ultima_atualizacao_fundo = agora
         else:
-            # Primeiro calcula a máscara sem alterar o modelo do fundo.
-            mascara = subtrator.apply(frame, learningRate=0)
-
             if auto_fundo:
-                intervalo = 1.0 / frequencia
-                if ultima_atualizacao_fundo is None:
-                    ultima_atualizacao_fundo = agora
-
-                decorrido = agora - ultima_atualizacao_fundo
-                if decorrido >= intervalo:
-                    # Compensa o intervalo entre atualizações para que a adaptação
-                    # não fique drasticamente mais lenta ao escolher uma frequência baixa.
-                    taxa = 1.0 - math.exp(-decorrido / TEMPO_ADAPTACAO_FUNDO)
-                    subtrator.apply(frame, learningRate=min(max(taxa, 0.0), 1.0))
-                    ultima_atualizacao_fundo = agora
+                mascara = subtrator.apply(frame)
             else:
-                # Ao desligar a atualização, o modelo fica congelado.
-                # Reinicia o relógio para evitar uma atualização brusca ao voltar a ligar.
-                ultima_atualizacao_fundo = agora
+                mascara = subtrator.apply(frame, learningRate=0)
 
         # Remover sombras e limpar ruído da máscara.
         _, mascara = cv2.threshold(mascara, 250, 255, cv2.THRESH_BINARY)
@@ -199,7 +176,7 @@ try:
         if aprendendo:
             estado_fundo = "A aprender o fundo..."
         elif auto_fundo:
-            estado_fundo = f"Fundo: automatico ({frequencia} Hz)"
+            estado_fundo = "Fundo: automatico"
         else:
             estado_fundo = "Fundo: congelado"
 
@@ -219,7 +196,6 @@ try:
         if tecla == ord("r"):
             subtrator = criar_subtrator(limiar_atual)
             n_frames = 0
-            ultima_atualizacao_fundo = None
             ultimo = [0.0] * N_ZONAS
             inicio = [0.0] * N_ZONAS
             estava_ativa = [False] * N_ZONAS

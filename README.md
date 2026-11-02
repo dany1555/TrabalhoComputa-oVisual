@@ -120,7 +120,22 @@ pip install opencv-python
 
 ---
 
-## Declaração do Uso de IA na Escrita de Código
+### Controlo em Tempo Real (HUD e Sliders)
+
+Durante a execução da aplicação, o ecrã apresenta em tempo real um conjunto de informações (*HUD*) na parte inferior e disponibiliza controlos interativos através de barras de deslize (*sliders*) na janela:
+
+* **Sliders de Controlo:**
+  * **Sensibilidade:** Permite ajustar o limiar (`varThreshold`) do algoritmo MOG2. Valores mais baixos tornam a deteção de movimento mais sensível a pequenas alterações, enquanto valores mais altos exigem mudanças maiores para acionar as animações.
+  * **Área Mínima (px):** Define o limiar mínimo de píxeis para que um contorno detetado seja considerado válido. Evita que pequenos ruídos na imagem ativem as zonas sem necessidade.
+  * **Atualizar Fundo (0/1):** Permite ligar (`1`) ou desligar (`0`) a atualização dinâmica do modelo de fundo do MOG2. Quando desligado, o fundo fica congelado (útil para evitar que alterações temporárias na iluminação afetem o programa); quando ligado, o sistema adapta-se gradualmente ao ambiente.
+* **Atalhos e Informação no HUD:**
+  * O ecrã indica o estado atual do fundo em tempo real (*"A aprender o fundo..."*, *"Fundo: automático"* ou *"Fundo: congelado"*).
+  * Pressionar a tecla **`r`** permite reiniciar instantaneamente o subtrator e forçar uma nova aprendizagem inicial do fundo.
+  * Pressionar **`q`** ou fechar a janela encerra a aplicação de forma segura.
+
+---
+
+## Declaração do Uso de IA
 
 Em cumprimento com as regras e diretrizes estabelecidas na ficha de unidade curricular:
 
