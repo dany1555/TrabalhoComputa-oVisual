@@ -16,7 +16,7 @@ O projeto teve como base o desenvolvimento de um programa que, atravez de uma ca
 
 | Zona | Objeto Associado | Animação | Quem Modelou |
 | :---: | :--- | :--- | :--- |
-| **Zona 1** (Esquerda) | **Cadeira** (`zona1_cadeira`) | Rotação/animação em ciclo da cadeira da esplanada (12 FPS) | *Daniel* |
+| **Zona 1** (Esquerda) | **Cadeira** (`zona1_cadeira`) | Rotação/animação em ciclo da cadeira da esplanada (24 FPS) | *Daniel* |
 | **Zona 2** (Centro) | **Copo** (`zona2_copo`) | Animação do copo de vidro em ciclo (24 FPS) | *Daniel* |
 | **Zona 3** (Direita) | **Vela** (`zona3_vela`) | Animação da vela com chama/movimento em ciclo (24 FPS) | *Vasco* |
 
