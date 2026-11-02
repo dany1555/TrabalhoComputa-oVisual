@@ -16,12 +16,15 @@ O projeto teve como base o desenvolvimento de um programa que, atravez de uma ca
 
 | Zona | Objeto Associado | Animação | Quem Modelou |
 | :---: | :--- | :--- | :--- |
-| **Zona 1** (Esquerda) | **Cadeira** (`zona1_cadeira`) | Rotação/animação em ciclo da cadeira da esplanada (12 FPS) | *Daniel* |
-| **Zona 2** (Centro) | **Copo** (`zona2_copo`) | Animação do copo de vidro em ciclo (24 FPS) | *Daniel* |
-| **Zona 3** (Direita) | **Vela** (`zona3_vela`) | Animação da vela com chama/movimento em ciclo (24 FPS) | *Vasco* |
+| **Zona 1**  | **Cadeira** (`zona1_cadeira`) | Rotação/animação em ciclo da cadeira da esplanada (12 FPS) | *Daniel* |
+| **Zona 2**  | **Copo** (`zona2_copo`) | Animação do copo de vidro em ciclo (24 FPS) | *Daniel* |
+| **Zona 3**  | **Vela** (`zona3_vela`) | Animação da vela com chama/movimento em ciclo (12 FPS) | *Vasco* |
+| **Zona 4** | **Saleiro** (`Zona4_Saleiro`) | Animação Saleiro em ciclo (24 FPS) | Daniel |
+| **Zona 5**  | **Jarro** (`Zona5_jarro`) | Animação de um jarro em ciclo (24 FPS) | *Vasco* |
+
 
 > **Nota:**  
-> Além dos objetos animados por zona, a cena 3D global inclui a mesa redonda, lugares postos (pratos, garfos, facas), tapete e lâmpada,um salgueiro e um jarro de água, modelados pelos elementos do grupo e disponibilizados na pasta `Blender/` e `Data/`. Estes objetos foram modelados por ambos os membros sendo escolhido os mais adequados para a cena final.
+> Além dos objetos animados por zona, a cena 3D global inclui a mesa redonda, lugares postos (pratos, garfos, facas), tapete e lâmpada, um saleiro e um jarro de água, na pasta `Blender/` e `Data/`. Estes objetos foram modelados por ambos os membros sendo escolhido os mais adequados para a cena final.
 
 ---
 
@@ -30,13 +33,13 @@ O projeto teve como base o desenvolvimento de um programa que, atravez de uma ca
 ```text
 TrabalhoComputa-oVisual/
 ├── Animacoes/
-│   └── assets/                  # Sequências de frames PNG em RGBA (fundo transparente)
-│       ├── zona1_cadeira/       # Frames da animação da Zona 1
-│       ├── zona2_copo/          # Frames da animação da Zona 2
-│       ├── zona3_vela/          # Frames da animação da Zona 3
-│       ├── zona4_Salgueiro/     # Frames da animação adicionais
-│       └── zona5_Jarro/         # Frames da animação adicionais
-├── Blender/                     # Ficheiros originais de modelação (.blend em Blender 5.2 LTS)
+│   └── assets/                     # Sequências de frames PNG em RGBA (fundo transparente)
+│       ├── zona1_cadeira/          # Frames de animação da Zona 1
+│       ├── zona2_copo/             # Frames de animação da Zona 2
+│       ├── zona3_vela/             # Frames de animação da Zona 3
+│       ├── zona4_Salgueiro/        # Frames de animação (adicionais)
+│       └── zona5_Jarro/            # Frames de animação (adicionais)
+├── Blender/                        # Ficheiros originais de modelação (.blend)
 │   ├── cadeira_cor.blend
 │   ├── Cadeira.blend
 │   ├── Copo.blend
@@ -46,24 +49,20 @@ TrabalhoComputa-oVisual/
 │   ├── Lampada.blend
 │   ├── mesa.blend
 │   ├── prato.blend
-│   ├── Salgueiro.blend
+│   ├── Saleiro.blend
 │   ├── Tapete.blend
-│   ├── vela.blend
-│   └── vela.blend1
-├── Data/                        # Cenas e texturas
+│   └── vela.blend
+├── Data/                           # Cenas e texturas
 │   ├── texturas/
 │   ├── cena1.blend
-│   ├── cena1.blend1
 │   └── cena1-Tudo.blend
-├── src/                         # Código-fonte Python
-│   ├── script.py                # Script principal
-│   ├── deteçao_movimento.py     # Deteção de movimento
-│   └── teste_camara.py          # Script auxiliar de teste de captura de câmara
+├── src/                            # Código-fonte Python
+│   ├── script.py                   # Script principal da aplicação
+│   └── teste_camera.py             # Script de teste e calibração do MOG2 com grelha visual
 ├── .gitattributes
-└── README.md                    # Documentação do projeto
+└── README.md                       # Documentação do projeto
 ```
 
----
 
 ## Instruções para Correr
 
@@ -81,12 +80,16 @@ pip install opencv-python
    cd TrabalhoComputa-oVisual
    ```
 
-2. **Testar a Webcam (Opcional):**  
-   Para verificar se a tua câmara/webcam está a funcionar corretamente:
-   ```bash
-   python src/teste_camara.py
+2. **Testar e Calibrar a Câmara com MOG2 (`teste\_camera.py`):**
+
+   Para testar a câmara e visualizar em tempo real os diferentes passos do algoritmo de subtração de fundo (com painéis para o fundo aprendido, máscara bruta com sombras, imagem limpa e resultados com sliders de sensibilidade e área mínima):
+
+```
+   python src/teste\_camera.py
+   
    ```
-   * Pressiona a tecla `q` ou fecha a janela com o rato para fechar a aplicação de teste.
+
+   * *Teclas úteis:* Pressiona **`q`** para sair ou **`r`** para reaprender o fundo instantaneamente.
 
 3. **Executar a Aplicação Principal:**
    ```bash
@@ -94,24 +97,26 @@ pip install opencv-python
    ```
 
 4. **Como utilizar:**
-   - O ecrã mostrará a imagem da câmara dividida em **3 Zonas** por linhas brancas.
-   - Movimenta a mão numa das zonas para ativar a animação do respetivo objeto (`Cadeira` na Zona 1, `Copo` na Zona 2, `Vela` na Zona 3).
-   - As caixas delimitadoras a verde (`cv2.rectangle`) identificam a região onde o movimento foi detetado.
-   - **Para Terminar:** Pressiona a tecla **`q`** ou fecha a janela de exibição.
+
+   * O ecrã mostra a imagem da câmara dividida em **5 Zonas** por linhas brancas.
+   * Movimenta-te ou coloca objetos nas zonas para ativar as respetivas animações.
+   * O fundo adapta-se de forma inteligente a alterações reais do ambiente (como variações na luz do dia ou se alguém deslocar uma cadeira).
+   * **Para Terminar:** Pressiona a tecla **`q`** ou fecha a janela.
 
 ---
 
+
 ## Explicação Técnica da Solução
 
-1. **Modelação e Renderização 3D (Blender 5.2 LTS):**
-   - Todos os objetos foram modelados manualmente.
-   - As animações foram exportadas em sequências de ficheiros PNG com fundo transparente, resolução proporcional em formato RGBA.
+1. **Modelação e Renderização 3D (Blender):**
 
-2. **Deteção de Movimento e Visão Computacional (OpenCV):**
-   - **Captura:** `cv2.VideoCapture(0)` com espelhamento horizontal (`cv2.flip(frame, 1)`) para ser mais intuitivo.
-   - **Algoritmo de Movimento:** Diferença absoluta entre frames consecutivos (`cv2.absdiff`), conversão para escala de cinzentos, suavização gaussiana (`cv2.GaussianBlur`), limiarização binária (`cv2.threshold`) e dilatação morfologia (`cv2.dilate`).
-   - **Contornos e Zonas:** Cálculo de contornos (`cv2.findContours`) com filtro por área mínima (>1000px). O centro X do vetor delimitador (`boundingRect`) calcula em qual das 3 zonas o movimento ocorreu.
-   - **Composição Alfa:** Algoritmo de mistura alfa (*Alpha Blending*) em tempo real que calcula a transparência píxel a píxel (`alfa * png + (1 - alfa) * roi`) sobrepondo a animação frame a frame com persistência temporal.
+   * Objetos modelados manualmente e exportados em sequências de imagens PNG com canal alfa (RGBA) para garantir transparências limpas.
+2. **Deteção de Movimento e Atualização de Fundo (OpenCV - MOG2):**
+
+   * **Subtração de Fundo Adaptativa:** Utilizamos o **`cv2.createBackgroundSubtractorMOG2`** para detetar o fundo e as alterações sobre o mesmo (que representa movimento).
+   * **Adaptação Dinâmica:** O fundo está continuamente a atualizar-se de forma automática para refletir situações reais onde as condições de luz mudam gradualmente (ex: luz solar a entrar pela janela) ou se houver alteração de elementos estáticos (ex: mover uma cadeira de sítio). Dispõe também da opção de congelar o fundo ou reiniciá-lo premindo a tecla `r`.
+   * **Filtragem Morfológica e Contornos:** Remoção de sombras detetadas pelo MOG2, aplicação de operações de abertura (*morphology open*) para remoção de ruído e dilatação para unir componentes conexos. O centro horizontal (`cx`) da caixa delimitadora (`boundingRect`) determina em qual das zonas o movimento ocorreu.
+   * **Composição Alfa (*Alpha Blending*):** Mistura suave píxel a píxel (`alfa \* png + (1 - alfa) \* roi`) para sobrepor as animações na imagem da câmara, complementada por um mecanismo de persistência temporal (`PERSISTENCIA = 0.7s`) para manter a animação fluida após o fim do movimento.
 
 ---
 
@@ -119,9 +124,11 @@ pip install opencv-python
 
 Em cumprimento com as regras e diretrizes estabelecidas na ficha de unidade curricular:
 
-- **Ferramentas de IA Utilizadas:** ChatGPT / Claude / Gemini.
-- **Onde foi utilizada:**
-  1. **Função `sobrepor()` em `src/script.py`:** Auxílio na lógica matemática de *clipping* e mistura dos canais RGBA (`alfa = png[:, :, 3:4] / 255.0`) para evitar erros de índice nas margens da janela.
-  2. **Tratamento de persistência temporal em `src/script.py`:** Estruturação da lógica de temporização (`time.time()`) para manter a animação ativa durante um intervalo configurável (`PERSISTENCIA = 0.7s`) após o fim do movimento.
-  3. **Elaboração da documentação em `README.md`:** Formatação em sintaxe Markdown e organização da estrutura do ficheiro de acordo com o guião de avaliação.
-- **Garantia de Conformidade:** NENHUM modelo de Aprendizagem Automática ou Redes Neuronais (YOLO, MediaPipe, etc.) foi utilizado na aplicação para deteção de movimento, sendo esta realizada exclusivamente através de técnicas clássicas de processamento de imagem em OpenCV.
+- **Ferramentas de IA Utilizadas:** ChatGPT / Claude / Gemini. (foi utilizado os 3 llm principalmente por gastar os tokens gratuitos de cada um)
+-1. **Função `sobrepor()` em `src/script.py`:** Auxílio na estruturação matemática do cálculo de mistura dos canais RGBA e tratamento de limites de recorte (*clipping*) nas margens da janela.
+2. **Gestão de Persistência Temporal e Controlo de Tempos:** Apoio na lógica de temporização baseada em `time.monotonic()` para gerir o tempo de permanência ativa das animações por zona.
+3. **Elaboração da Documentação (`README.md`):** Organização e formatação da estrutura em Markdown para apresentação do projeto.
+4. **Integração de MOG2:** Inicialmente foi feito a deteção de movimento atravez de diferença de pixeis. Mais tarde foi decidido alterar para comparação com o fundo. Entao foi utilizado ajuda de IA para fazer essa transição
+
+*Nota:* Em todos os momentos da organização em que foi utilizado IA foi utilizado de forma ética e consciente. Todo o codigo e texto presente foi revisto e alterado manualmente no caso de o necessitar.
+Os modelos foram totalmente feitos com as ferramentas utilizadas em aula.
