@@ -6,7 +6,7 @@ from pathlib import Path
 N_ZONAS = 5
 PERSISTENCIA = 0.7   # segundos que a zona fica ativa depois do último movimento
 FPS_ANIM = [12, 24, 24, 24, 24]               # velocidade da animação (frames por segundo)
-TAMANHO_REL = [0.85, 1.1, 1.1, 1.1, 1.1]      # tamanho relativo de cada animação
+TAMANHO_REL = [1.1, 1.1, 1.1, 1.1, 1.0]      # tamanho relativo de cada animação
 RECORTAR = [False, False, False, False, True] # True = tira as margens transparentes dos PNGs
 FRAMES_APRENDIZAGEM = 40   # frames iniciais para o MOG2 aprender o fundo
 
