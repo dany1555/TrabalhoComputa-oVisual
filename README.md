@@ -57,7 +57,6 @@ TrabalhoComputa-oVisual/
 │   └── cena1-Tudo.blend
 ├── src/                         # Código-fonte Python
 │   ├── script.py                # Script principal
-│   ├── deteçao_movimento.py     # Deteção de movimento
 │   └── teste_camara.py          # Script auxiliar de teste de captura de câmara
 ├── .gitattributes
 └── README.md                    # Documentação do projeto
