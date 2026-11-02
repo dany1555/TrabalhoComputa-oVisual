@@ -34,8 +34,8 @@ TrabalhoComputa-oVisual/
 │       ├── zona1_cadeira/       # Frames da animação da Zona 1
 │       ├── zona2_copo/          # Frames da animação da Zona 2
 │       ├── zona3_vela/          # Frames da animação da Zona 3
-│       ├── zona4_Salgueiro/     # Frames da animação adicionais
-│       └── zona5_Jarro/         # Frames da animação adicionais
+│       ├── zona4_Salgueiro/     # Frames da animação da Zona 4
+│       └── zona5_Jarro/         # Frames da animação da Zona 5
 ├── Blender/                     # Ficheiros originais de modelação (.blend em Blender 5.2 LTS)
 │   ├── cadeira_cor.blend
 │   ├── Cadeira.blend
@@ -93,8 +93,8 @@ pip install opencv-python
    ```
 
 4. **Como utilizar:**
-   - O ecrã mostrará a imagem da câmara dividida em **3 Zonas** por linhas brancas.
-   - Movimenta a mão numa das zonas para ativar a animação do respetivo objeto (`Cadeira` na Zona 1, `Copo` na Zona 2, `Vela` na Zona 3).
+   - O ecrã mostrará a imagem da câmara dividida em **5 Zonas** por linhas brancas.
+   - Movimenta a mão numa das zonas para ativar a animação do respetivo objeto (`Cadeira` na Zona 1, `Copo` na Zona 2, `Vela` na Zona 3,`Salgueiro` na Zona 4, `Jarro` na Zona 5 ).
    - As caixas delimitadoras a verde (`cv2.rectangle`) identificam a região onde o movimento foi detetado.
    - **Para Terminar:** Pressiona a tecla **`q`** ou fecha a janela de exibição.
 
@@ -109,7 +109,7 @@ pip install opencv-python
 2. **Deteção de Movimento e Visão Computacional (OpenCV):**
    - **Captura:** `cv2.VideoCapture(0)` com espelhamento horizontal (`cv2.flip(frame, 1)`) para ser mais intuitivo.
    - **Algoritmo de Movimento:** Diferença absoluta entre frames consecutivos (`cv2.absdiff`), conversão para escala de cinzentos, suavização gaussiana (`cv2.GaussianBlur`), limiarização binária (`cv2.threshold`) e dilatação morfologia (`cv2.dilate`).
-   - **Contornos e Zonas:** Cálculo de contornos (`cv2.findContours`) com filtro por área mínima (>1000px). O centro X do vetor delimitador (`boundingRect`) calcula em qual das 3 zonas o movimento ocorreu.
+   - **Contornos e Zonas:** Cálculo de contornos (`cv2.findContours`) com filtro por área mínima (>1000px). O centro X do vetor delimitador (`boundingRect`) calcula em qual das 5 zonas o movimento ocorreu.
    - **Composição Alfa:** Algoritmo de mistura alfa (*Alpha Blending*) em tempo real que calcula a transparência píxel a píxel (`alfa * png + (1 - alfa) * roi`) sobrepondo a animação frame a frame com persistência temporal.
 
 ---
