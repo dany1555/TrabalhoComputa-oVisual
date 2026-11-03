@@ -85,7 +85,7 @@ pip install opencv-python
    Para testar a câmara e visualizar em tempo real os diferentes passos do algoritmo de subtração de fundo (com painéis para o fundo aprendido, máscara bruta com sombras, imagem limpa e resultados com sliders de sensibilidade e área mínima):
 
 ```
-   python src/teste\_camera.py
+   python src/teste_camera.py
    
    ```
 

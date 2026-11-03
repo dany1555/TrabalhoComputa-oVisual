@@ -16,9 +16,12 @@ ASSETS = RAIZ / "Animacoes" / "assets"
 PASTAS = ["zona1_cadeira", "zona2_copo", "zona3_vela", "Zona4_Salgueiro", "Zona5_jarro"]
 
 JANELA = "Projeto"
-SLIDER_SENSIBILIDADE = "Sensibilidade (menor = mais sensivel)"
-SLIDER_AREA = "Area minima (px)"
-SLIDER_AUTO = "Atualizar fundo (0=nao, 1=sim)"
+JANELA_CONTROLOS = "Controlos"
+RESOLUCAO_CAMERA = (640, 480)
+TAMANHO_JANELA_INICIAL = (480, 360)
+SLIDER_SENSIBILIDADE = "Sensibilidade"
+SLIDER_AREA = "Area minima"
+SLIDER_AUTO = "Auto fundo"
 
 
 def criar_subtrator(limiar):
@@ -69,6 +72,9 @@ cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     raise SystemExit("Não foi possível abrir a câmara")
 
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, RESOLUCAO_CAMERA[0])
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, RESOLUCAO_CAMERA[1])
+
 # Ler um frame só para saber o tamanho da câmara e preparar as animações
 ok, frame = cap.read()
 if not ok:
@@ -76,6 +82,7 @@ if not ok:
     raise SystemExit("Não consegui ler a câmara")
 
 frame = cv2.flip(frame, 1)
+frame = cv2.resize(frame, RESOLUCAO_CAMERA, interpolation=cv2.INTER_AREA)
 altura, largura = frame.shape[:2]
 tamanho = [int(altura * r) for r in TAMANHO_REL]
 
@@ -85,14 +92,15 @@ except Exception:
     cap.release()
     raise
 
-# Criar a janela redimensionável e os controlos.
+# Criar a janela redimensionável. Os controlos ficam separados para não
+# imporem uma largura mínima à janela da imagem.
 cv2.namedWindow(JANELA, cv2.WINDOW_NORMAL)
-cv2.createTrackbar(SLIDER_SENSIBILIDADE, JANELA, 50, 200, lambda v: None)
-cv2.createTrackbar(SLIDER_AREA, JANELA, 1000, 5000, lambda v: None)
-cv2.createTrackbar(SLIDER_AUTO, JANELA, 1, 1, lambda v: None)
-
-# A janela fica maior; a altura extra dá espaço aos sliders.
-cv2.resizeWindow(JANELA, int(largura * 1.10), int(altura * 1.10) + 90)
+cv2.namedWindow(JANELA_CONTROLOS, cv2.WINDOW_NORMAL)
+cv2.createTrackbar(SLIDER_SENSIBILIDADE, JANELA_CONTROLOS, 50, 200, lambda v: None)
+cv2.createTrackbar(SLIDER_AREA, JANELA_CONTROLOS, 1000, 5000, lambda v: None)
+cv2.createTrackbar(SLIDER_AUTO, JANELA_CONTROLOS, 1, 1, lambda v: None)
+cv2.resizeWindow(JANELA, *TAMANHO_JANELA_INICIAL)
+cv2.resizeWindow(JANELA_CONTROLOS, 400, 150)
 
 limiar_atual = 50
 subtrator = criar_subtrator(limiar_atual)
@@ -110,13 +118,14 @@ try:
             break
 
         frame = cv2.flip(frame, 1) # espelhar horizontalmente para ser mais intuitivo
+        frame = cv2.resize(frame, RESOLUCAO_CAMERA, interpolation=cv2.INTER_AREA)
         n_frames += 1
         agora = time.monotonic()
 
         # Ler os controlos. O varThreshold mais baixo torna a deteção mais sensível.
-        limiar = max(cv2.getTrackbarPos(SLIDER_SENSIBILIDADE, JANELA), 1)
-        area_min = cv2.getTrackbarPos(SLIDER_AREA, JANELA)
-        auto_fundo = cv2.getTrackbarPos(SLIDER_AUTO, JANELA) == 1
+        limiar = max(cv2.getTrackbarPos(SLIDER_SENSIBILIDADE, JANELA_CONTROLOS), 1)
+        area_min = cv2.getTrackbarPos(SLIDER_AREA, JANELA_CONTROLOS)
+        auto_fundo = cv2.getTrackbarPos(SLIDER_AUTO, JANELA_CONTROLOS) == 1
 
         if limiar != limiar_atual:
             subtrator.setVarThreshold(limiar)
@@ -185,7 +194,17 @@ try:
         cv2.putText(frame, f"Sensibilidade: {limiar} | Area minima: {area_min} px",
                     (10, altura - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
-        cv2.imshow(JANELA, frame)
+        # Apresentar a imagem à escala da janela evita que os 640 px da câmara
+        # imponham uma largura mínima e permite redimensioná-la horizontalmente.
+        _, _, janela_largura, janela_altura = cv2.getWindowImageRect(JANELA)
+        display_largura = max(janela_largura, 1)
+        display_altura = max(janela_altura, 1)
+        frame_display = cv2.resize(
+            frame,
+            (display_largura, display_altura),
+            interpolation=cv2.INTER_AREA
+        )
+        cv2.imshow(JANELA, frame_display)
 
         tecla = cv2.waitKey(1) & 0xFF
         fechada = cv2.getWindowProperty(JANELA, cv2.WND_PROP_VISIBLE) < 1
