@@ -10,7 +10,7 @@ def criar_subtrator(limiar):
 
 
 def painel(img, titulo): # definir função para redimensionar e adicionar título
-    """Redimensiona para a largura do painel, garante 3 canais e escreve o título."""
+    # Redimensiona para a largura do painel, garante 3 canais e escreve o título.
     if img.ndim == 2:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
     h, w = img.shape[:2]
@@ -21,7 +21,7 @@ def painel(img, titulo): # definir função para redimensionar e adicionar títu
 
 
 def mascara_bruta_colorida(m):
-    """MOG2 devolve 0 (fundo), 127 (sombra) ou 255 (movimento). Damos uma cor a cada."""
+    # MOG2 devolve 0 (fundo), 127 (sombra) ou 255 (movimento). Damos uma cor a cada.
     out = np.zeros((*m.shape, 3), dtype="uint8")
     out[m == 127] = (255, 120, 0)     # sombra  -> azul
     out[m == 255] = (255, 255, 255)   # movimento -> branco
