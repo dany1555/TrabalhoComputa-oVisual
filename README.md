@@ -19,7 +19,7 @@ O projeto teve como base o desenvolvimento de um programa que, atravez de uma ca
 | **Zona 1**  | **Cadeira** (`zona1_cadeira`) | Rotação/animação em ciclo da cadeira da esplanada (12 FPS) | *Daniel* |
 | **Zona 2**  | **Copo** (`zona2_copo`) | Animação do copo de vidro em ciclo (24 FPS) | *Daniel* |
 | **Zona 3**  | **Vela** (`zona3_vela`) | Animação da vela com chama/movimento em ciclo (12 FPS) | *Vasco* |
-| **Zona 4** | **Saleiro** (`Zona4_Saleiro`) | Animação Saleiro em ciclo (24 FPS) | Daniel |
+| **Zona 4** | **Saleiro** (`Zona4_Salgueiro`) | Animação Saleiro em ciclo (24 FPS) | Daniel |
 | **Zona 5**  | **Jarro** (`Zona5_jarro`) | Animação de um jarro em ciclo (24 FPS) | *Vasco* |
 
 
@@ -32,36 +32,45 @@ O projeto teve como base o desenvolvimento de um programa que, atravez de uma ca
 
 ```text
 TrabalhoComputa-oVisual/
-├── Animacoes/
-│   └── assets/                     # Sequências de frames PNG em RGBA (fundo transparente)
-│       ├── zona1_cadeira/          # Frames de animação da Zona 1
-│       ├── zona2_copo/             # Frames de animação da Zona 2
-│       ├── zona3_vela/             # Frames de animação da Zona 3
-│       ├── zona4_Salgueiro/        # Frames de animação (adicionais)
-│       └── zona5_Jarro/            # Frames de animação (adicionais)
-├── Blender/                        # Ficheiros originais de modelação (.blend)
-│   ├── cadeira_cor.blend
+├── Animacoes/                          # Recursos visuais usados pela aplicação
+│   └── assets/                         # Frames PNG RGBA das animações
+│       ├── zona1_cadeira/              # Animação da cadeira
+│       ├── zona2_copo/                 # Animação do copo
+│       ├── zona3_vela/                 # Animação da vela
+│       ├── Zona4_Salgueiro/            # Animação do saleiro
+│       └── Zona5_jarro/                # Animação do jarro
+├── Blender/                            # Modelos 3D individuais (.blend)
 │   ├── Cadeira.blend
+│   ├── cadeira_cor.blend
 │   ├── Copo.blend
 │   ├── Faca.blend
 │   ├── Garfo.blend
 │   ├── Jarro.blend
 │   ├── Lampada.blend
+│   ├── Lampadaestranha.blend
 │   ├── mesa.blend
 │   ├── prato.blend
+│   ├── render-base.blend
 │   ├── Saleiro.blend
 │   ├── Tapete.blend
 │   └── vela.blend
-├── Data/                           # Cenas e texturas
-│   ├── texturas/
-│   ├── cena1.blend
-│   └── cena1-Tudo.blend
-├── src/                            # Código-fonte Python
-│   ├── script.py                   # Script principal da aplicação
-│   └── teste_camera.py             # Script de teste e calibração do MOG2 com grelha visual
-├── .gitattributes
-└── README.md                       # Documentação do projeto
+├── Data/                               # Cenas finais e texturas
+│   ├── texturas/                       # Texturas usadas nos materiais 3D
+│   ├── cena1.blend                     # Cena principal
+│   └── cena1-Tudo.blend                # Cena completa
+├── src/                                # Código-fonte Python
+│   ├── script.py                       # Aplicação principal com OpenCV
+│   └── teste_camera.py                 # Teste da câmara e calibração do MOG2
+├── CV.mp4                              # Vídeo associado ao projeto
+├── render.png                          # Renderização de referência
+├── .gitattributes                      # Configuração de atributos do Git
+├── .gitignore                          # Ficheiros excluídos do Git
+└── README.md                           # Documentação do projeto
 ```
+
+> **Nota:** A pasta `.venv/`, os ficheiros `*.blend1` e `src/__pycache__/` são
+> ficheiros auxiliares ou gerados localmente e não fazem parte da organização
+> principal do projeto.
 
 
 ## Instruções para Correr
